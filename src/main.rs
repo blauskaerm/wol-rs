@@ -1,8 +1,6 @@
 use std::env;
 use std::net::{SocketAddr, UdpSocket};
 
-include!("wol.rs");
-
 fn send_wol_package(dst_mac: [u8; 6]) {
     let wol_sync_stream = [0xFF; 6];
 
