@@ -1,11 +1,11 @@
 use std::env;
 use std::net::{SocketAddr, UdpSocket};
+use std::process;
 
 include!("wol.rs");
 
-fn send_wol_package() {
+fn send_wol_package(dst_mac: [u8; 6]) {
     let sync_stream = [0xFF; 6];
-    let dst_mac = [0x00, 0x90, 0x27, 0x85, 0xcf, 0x01];
 
     // Create Magic packet
     let mut vector: Vec<u8> = Vec::new();
@@ -39,12 +39,34 @@ fn usage() {
     println!("Usage: ./wol-rs MAC-addr");
 }
 
+fn parse_mac_argument(mac_string: &String) -> [u8; 6] {
+    let mut result = [0x00; 6];
+
+    for i in 0..6 {
+        let mac_slice = &mac_string[(3 * i)..(3 * i + 2)];
+
+        match i64::from_str_radix(mac_slice, 16) {
+            Ok(value) => {
+                result[i] = value as u8;
+            }
+            Err(_) => {
+                println!("Error parsing");
+                process::exit(1);
+            }
+        }
+    }
+
+    result
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     match args.get(1) {
-        Some(mac_addr) => {
-            println!("Send WOL to MAC {}", mac_addr);
-            send_wol_package();
+        Some(mac_addr_string) => {
+            let mac_addr = parse_mac_argument(&mac_addr_string);
+
+            println!("Send WOL to MAC {}", mac_addr_string);
+            send_wol_package(mac_addr);
         }
         None => {
             usage();
