@@ -4,15 +4,14 @@ use std::net::{SocketAddr, UdpSocket};
 include!("wol.rs");
 
 fn send_wol_package(dst_mac: [u8; 6]) {
-    let sync_stream = [0xFF; 6];
+    let wol_sync_stream = [0xFF; 6];
 
     // Create Magic packet
-    let mut vector: Vec<u8> = Vec::new();
-    vector.extend(sync_stream.iter().copied());
+    let mut buffer: Vec<u8> = Vec::with_capacity(6 + 16 * 6);
+    buffer.extend(wol_sync_stream.iter().copied());
     for _i in 0..16 {
-        vector.extend(dst_mac.iter().copied());
+        buffer.extend(dst_mac.iter().copied());
     }
-    let buffer = vector.as_slice();
 
     // Create a bind socket
     let socket = UdpSocket::bind("0.0.0.0:0").expect("couldn't bind to address");
@@ -23,15 +22,15 @@ fn send_wol_package(dst_mac: [u8; 6]) {
     // Create destination server address
     const UDP_PORT: u16 = 9;
     let dst_addr = "255.255.255.255";
-    let server_details = format!("{}:{}", dst_addr, UDP_PORT);
+    let dst_details = format!("{}:{}", dst_addr, UDP_PORT);
 
     // Create destination socket address
-    let server: SocketAddr = server_details
-        .parse()
-        .expect("Unable to parse socket address");
+    let socket_addr: SocketAddr = dst_details.parse().expect("Unable to parse socket address");
 
     // Send UDP packet
-    socket.send_to(buffer, server).expect("couldn't send data");
+    socket
+        .send_to(buffer.as_slice(), socket_addr)
+        .expect("couldn't send data");
 }
 
 fn usage() {
@@ -41,15 +40,19 @@ fn usage() {
 fn parse_mac_argument(mac_string: &String) -> Result<[u8; 6], ()> {
     let mut result = [0x00; 6];
 
-    for i in 0..6 {
-        let mac_slice = &mac_string[(3 * i)..(3 * i + 2)];
+    if mac_string.len() == 17 {
+        for i in 0..6 {
+            let mac_slice = &mac_string[(3 * i)..(3 * i + 2)];
 
-        match i64::from_str_radix(mac_slice, 16) {
-            Ok(value) => {
-                result[i] = value as u8;
+            match i64::from_str_radix(mac_slice, 16) {
+                Ok(value) => {
+                    result[i] = value as u8;
+                }
+                Err(_) => return Err(()),
             }
-            Err(_) => return Err(()),
         }
+    } else {
+        return Err(());
     }
 
     Ok(result)
