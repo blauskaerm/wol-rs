@@ -9,16 +9,17 @@ fn main() {
     // Create Magic packet
     let mut vector : Vec<u8> = Vec::new();
     vector.extend(sync_stream.iter().copied());
-    for _i in 1..16 {
+    for _i in 0..16 {
         vector.extend(dst_mac.iter().copied());
     }
     let buffer = vector.as_slice();
 
     // Create a bind socket
-    let socket = UdpSocket::bind("127.0.0.1:34254").expect("couldn't bind to address");
+    let socket = UdpSocket::bind("0.0.0.0:0").expect("couldn't bind to address");
+    socket.set_broadcast(true);
 
     // Create destination server address
-    const UDP_PORT: u16 = 4;
+    const UDP_PORT: u16 = 9;
     let dst_addr = "255.255.255.255";
     let server_details = format!("{}:{}", dst_addr, UDP_PORT);
 
