@@ -1,25 +1,15 @@
-use std::net::{UdpSocket, SocketAddr};
+use std::net::{SocketAddr, UdpSocket};
 
 include!("wol.rs");
 
 fn main() {
+    let sync_stream = [0xFF; 6];
+    let dst_mac = [0x1c, 0x39, 0x47, 0xd0, 0x9d, 0xec];
 
-    let sync_stream = [0xFF;6];
-    let dst_mac = [
-        0x1c,
-        0x39,
-        0x47,
-        0xd0,
-        0x9d,
-        0xec
-    ];
-
-
-    let buffer = [0x48,0x45,0x4C,0x4C,0x4F,0x0A];
+    let buffer = [0x48, 0x45, 0x4C, 0x4C, 0x4F, 0x0A];
 
     // Create a bind socket
-    let socket = UdpSocket::bind("127.0.0.1:34254")
-        .expect("couldn't bind to address");
+    let socket = UdpSocket::bind("127.0.0.1:34254").expect("couldn't bind to address");
 
     // Create destination server address
     const UDP_PORT: u16 = 8080;
@@ -32,6 +22,5 @@ fn main() {
         .expect("Unable to parse socket address");
 
     // Send UDP packet
-    socket.send_to(&buffer, server)
-        .expect("couldn't send data");
+    socket.send_to(&buffer, server).expect("couldn't send data");
 }
