@@ -1,6 +1,5 @@
 use std::env;
 use std::net::{SocketAddr, UdpSocket};
-use std::process;
 
 include!("wol.rs");
 
@@ -39,7 +38,7 @@ fn usage() {
     println!("Usage: ./wol-rs MAC-addr");
 }
 
-fn parse_mac_argument(mac_string: &String) -> [u8; 6] {
+fn parse_mac_argument(mac_string: &String) -> Result<[u8; 6], ()> {
     let mut result = [0x00; 6];
 
     for i in 0..6 {
@@ -49,25 +48,26 @@ fn parse_mac_argument(mac_string: &String) -> [u8; 6] {
             Ok(value) => {
                 result[i] = value as u8;
             }
-            Err(_) => {
-                println!("Error parsing");
-                process::exit(1);
-            }
+            Err(_) => return Err(()),
         }
     }
 
-    result
+    Ok(result)
 }
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     match args.get(1) {
-        Some(mac_addr_string) => {
-            let mac_addr = parse_mac_argument(&mac_addr_string);
-
-            println!("Send WOL to MAC {}", mac_addr_string);
-            send_wol_package(mac_addr);
-        }
+        Some(mac_addr_string) => match parse_mac_argument(&mac_addr_string) {
+            Ok(mac_addr) => {
+                println!("Send WOL to MAC {}", mac_addr_string);
+                send_wol_package(mac_addr);
+            }
+            Err(_) => {
+                eprintln!("Failed to parse MAC addr");
+                usage();
+            }
+        },
         None => {
             usage();
         }
