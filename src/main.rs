@@ -32,7 +32,7 @@ fn send_wol_package(dst_mac: [u8; 6]) {
 }
 
 fn usage() {
-    println!("Usage: ./wol-rs MAC-addr");
+    println!("\nUsage: ./wol-rs XX:XX:XX:XX:XX:XX\n");
 }
 
 fn parse_mac_argument(mac_string: &String) -> Result<[u8; 6], ()> {
