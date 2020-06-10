@@ -5,7 +5,8 @@ fn send_wol_package(dst_mac: [u8; 6]) {
     let wol_sync_stream = [0xFF; 6];
 
     // Create Magic packet
-    let mut buffer: Vec<u8> = Vec::with_capacity(6 + 16 * 6);
+    let buffer_cap: usize = wol_sync_stream.len() + 16 * dst_mac.len();
+    let mut buffer: Vec<u8> = Vec::with_capacity(buffer_cap);
     buffer.extend(wol_sync_stream.iter().copied());
     for _i in 0..16 {
         buffer.extend(dst_mac.iter().copied());
