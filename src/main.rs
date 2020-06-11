@@ -75,3 +75,38 @@ fn main() {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_parse_mac_ok() {
+        let mac_addr_arg = String::from("00:90:27:85:CF:00");
+        let expected: [u8; 6] = [0x00, 0x90, 0x27, 0x85, 0xCF, 0x00];
+        let test_result = parse_mac_argument(&mac_addr_arg);
+        assert_eq!(test_result, Ok(expected));
+    }
+
+    #[test]
+    fn test_parse_mac_short() {
+        let mac_addr_arg = String::from("00:90:27:85:CF:0");
+        let test_result = parse_mac_argument(&mac_addr_arg);
+        assert_eq!(test_result, Err(()));
+    }
+
+    #[test]
+    fn test_parse_mac_long() {
+        let mac_addr_arg = String::from("00:90:27:85:CF:00:00");
+        let test_result = parse_mac_argument(&mac_addr_arg);
+        assert_eq!(test_result, Err(()));
+    }
+
+    #[test]
+    fn test_parse_mac_invalid() {
+        let mac_addr_arg = String::from("00:90:27:85:QF:00");
+        let test_result = parse_mac_argument(&mac_addr_arg);
+        assert_eq!(test_result, Err(()));
+    }
+}
