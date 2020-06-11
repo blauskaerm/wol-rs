@@ -39,7 +39,8 @@ fn usage() {
 fn parse_mac_argument(mac_string: &String) -> Result<[u8; 6], ()> {
     let mut result = [0x00; 6];
 
-    if mac_string.len() == 17 {
+    const MAC_ADDR_STR_LEN: usize = 17;
+    if mac_string.len() == MAC_ADDR_STR_LEN {
         for i in 0..6 {
             let mac_slice = &mac_string[(3 * i)..(3 * i + 2)];
 
