@@ -79,7 +79,7 @@ fn main() {
         }
         Err(_) => {
             eprintln!("Failed to parse MAC address");
-            process::exit(0x00)
+            process::exit(-1)
         }
     }
 }
