@@ -1,5 +1,8 @@
-use std::env;
 use std::net::{SocketAddr, UdpSocket};
+use std::process;
+
+extern crate clap;
+use clap::{App, Arg};
 
 fn send_wol_package(dst_mac: [u8; 6]) {
     let wol_sync_stream = [0xFF; 6];
@@ -32,10 +35,6 @@ fn send_wol_package(dst_mac: [u8; 6]) {
         .expect("couldn't send data");
 }
 
-fn usage() {
-    println!("\nUsage: ./wol-rs XX:XX:XX:XX:XX:XX\n");
-}
-
 fn parse_mac_argument(mac_string: &String) -> Result<[u8; 6], ()> {
     let mut result = [0x00; 6];
 
@@ -59,20 +58,28 @@ fn parse_mac_argument(mac_string: &String) -> Result<[u8; 6], ()> {
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    match args.get(1) {
-        Some(mac_addr_string) => match parse_mac_argument(&mac_addr_string) {
-            Ok(mac_addr) => {
-                println!("Send WOL to MAC {}", mac_addr_string);
-                send_wol_package(mac_addr);
-            }
-            Err(_) => {
-                eprintln!("Failed to parse MAC addr");
-                usage();
-            }
-        },
-        None => {
-            usage();
+    let matches = App::new("wol-rs")
+        .version("0.1")
+        .author("Erik Viktorsson <blauskaerm@protonmail.ch>")
+        .about("Simple Wake On Lan client")
+        .arg(
+            Arg::with_name("MAC")
+                .help("MAC address of target machine (XX:XX:XX:XX:XX:XX)")
+                .required(true)
+                .index(1),
+        )
+        .get_matches();
+
+    let mac_addr_string = String::from(matches.value_of("MAC").unwrap_or(""));
+
+    match parse_mac_argument(&mac_addr_string) {
+        Ok(mac_addr) => {
+            println!("Send WOL to MAC {}", mac_addr_string);
+            send_wol_package(mac_addr);
+        }
+        Err(_) => {
+            eprintln!("Failed to parse MAC address");
+            process::exit(0x00)
         }
     }
 }
