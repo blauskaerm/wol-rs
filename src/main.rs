@@ -59,8 +59,8 @@ fn parse_mac_argument(mac_string: &String) -> Result<[u8; 6], ()> {
 
 fn main() {
     let matches = App::new("wol-rs")
-        .version("0.1")
-        .author("Erik Viktorsson <blauskaerm@protonmail.ch>")
+        .version("0.1.0")
+        .author("BlauskaerM <blauskaerm@protonmail.ch>")
         .about("Simple Wake On Lan client")
         .arg(
             Arg::with_name("MAC")
